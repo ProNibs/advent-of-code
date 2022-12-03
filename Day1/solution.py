@@ -24,9 +24,3 @@ total = 0
 for idx, i in enumerate(top_three):
     total += i
 print(total)
-
-
-
-
-
-    
