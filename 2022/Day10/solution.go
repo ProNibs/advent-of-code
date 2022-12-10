@@ -118,5 +118,4 @@ func main() {
 	for _, row := range pixel_drawing {
 		fmt.Println(row)
 	}
-
 }

@@ -132,5 +132,4 @@ func main() {
 		solution_two += stack[len(stack)-1]
 	}
 	fmt.Println(solution_two)
-
 }
