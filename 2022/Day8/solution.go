@@ -56,10 +56,6 @@ func main() {
 						break
 					}
 				}
-				if visible_from_left {
-					visible_trees += 1
-					continue
-				}
 
 				// Check right now
 				var visible_from_right = true
@@ -72,10 +68,7 @@ func main() {
 						break
 					}
 				}
-				if visible_from_right {
-					visible_trees += 1
-					continue
-				}
+
 				// Now to check for visibility up and down, which is more annoying
 				// Let's start with up
 				var visible_from_north = true
@@ -89,10 +82,7 @@ func main() {
 						break
 					}
 				}
-				if visible_from_north {
-					visible_trees += 1
-					continue
-				}
+
 				var visible_from_south = true
 				for x := idx + 1; x < len(lines); x++ {
 					//fmt.Println("Row", x)
@@ -104,9 +94,8 @@ func main() {
 						break
 					}
 				}
-				if visible_from_south {
+				if visible_from_left || visible_from_right || visible_from_north || visible_from_south {
 					visible_trees += 1
-					continue
 				}
 			}
 		}
