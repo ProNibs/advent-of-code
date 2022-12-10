@@ -28,6 +28,7 @@ func main() {
 	lines, _ := readLines("data.txt")
 
 	var visible_trees = 0
+	//var max_scenic_score = 0
 	for idx, line := range lines {
 		// Top and bottom rows always visible
 		if idx == 0 || idx == len(lines)-1 {
@@ -42,11 +43,11 @@ func main() {
 					continue
 				}
 				var current_number, _ = strconv.Atoi(string(j))
-				var visible_from_left = true
-				var visible_from_right = true
+				//var scenic_score = 1
 				fmt.Println("Current number", current_number, "Row", idx+1, "Column", i+1)
 				// Definitely not an edge, let's check left
-				for x := 0; x < i; x++ {
+				var visible_from_left = true
+				for x := i - 1; x >= 0; x-- {
 					var left_number, _ = strconv.Atoi(string(line[x]))
 					// If a number to the left is too big, not visible this way
 					if left_number >= current_number {
@@ -59,8 +60,10 @@ func main() {
 					visible_trees += 1
 					continue
 				}
+
 				// Check right now
-				for x := len(line) - 1; x > i; x-- {
+				var visible_from_right = true
+				for x := i + 1; x < len(line); x++ {
 					var right_number, _ = strconv.Atoi(string(line[x]))
 					// If a number to the right is too big, not visible that way
 					if right_number >= current_number {
@@ -76,7 +79,7 @@ func main() {
 				// Now to check for visibility up and down, which is more annoying
 				// Let's start with up
 				var visible_from_north = true
-				for x := 0; x < idx; x++ {
+				for x := idx - 1; x >= 0; x-- {
 					//fmt.Println("Row", x)
 					var above_number, _ = strconv.Atoi(string(lines[x][i]))
 					//fmt.Println("Above number is", above_number)
@@ -91,7 +94,7 @@ func main() {
 					continue
 				}
 				var visible_from_south = true
-				for x := len(lines) - 1; x > idx; x-- {
+				for x := idx + 1; x < len(lines); x++ {
 					//fmt.Println("Row", x)
 					var below_number, _ = strconv.Atoi(string(lines[x][i]))
 					//fmt.Println("Below number is", below_number)
