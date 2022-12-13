@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	big "github.com/ncw/gmp"
 )
 
 // readLines reads a whole file into memory
@@ -27,7 +29,7 @@ func readLines(path string) ([]string, error) {
 }
 
 type Monkey struct {
-	items            []int
+	items            []*big.Int
 	operation_first  string
 	operator         string
 	operation_second string
@@ -36,7 +38,7 @@ type Monkey struct {
 	// Pass/fail is always pass to X monkey
 	test_pass     int
 	test_fail     int
-	inspect_count int
+	inspect_count *big.Int
 }
 
 func stressRelief(input int) (output int) {
@@ -44,50 +46,61 @@ func stressRelief(input int) (output int) {
 	return output
 }
 
-func monkeyOperation(first int, second int, operator string) int {
+func monkeyOperation(first *big.Int, second *big.Int, operator string) *big.Int {
 	if operator == "+" {
-		return first + second
+		return first.Add(first, second)
 	} else if operator == "*" {
-		return first * second
+		return first.Mul(first, second)
 	}
 	// Should only be one of the above
-	return -1
+	fmt.Println("Error during monkey operation")
+	os.Exit(0)
+	return big.NewInt(0)
 }
 
-func oneMonkeyInspection(input Monkey) (output Monkey, inspectItem int, monkeyThrow int) {
-	// Assume there is an item to inpsect before this function is called
+func oneMonkeyInspection(input Monkey) (output Monkey, inspectItem *big.Int, monkeyThrow int) {
+	// Assume there is an item to inspect before this function is called
 	inspectItem = input.items[0]
 	output = input
 	if len(input.items) == 1 {
 		// This is the last item the monkey inspects
-		output.items = make([]int, 0)
+		output.items = make([]*big.Int, 0)
 	} else { // Otherwise, pop it out
 		output.items = output.items[1:]
 	}
-	var first = 0
-	var second = 0
+	first := big.NewInt(0)
+	second := big.NewInt(0)
 	if input.operation_first == "old" {
 		first = inspectItem
 	} else {
 		// If not old, it's a number
-		first, _ = strconv.Atoi(input.operation_first)
+		first.SetString(input.operation_first, 10)
 	}
 	if input.operation_second == "old" {
 		second = inspectItem
 	} else {
 		// If not old, it's a number
-		second, _ = strconv.Atoi(input.operation_second)
+		second.SetString(input.operation_second, 10)
 	}
 	// Worry level increased due to specific monkey and then relief!
 	inspectItem = monkeyOperation(first, second, input.operator)
-	inspectItem = stressRelief(inspectItem)
+	// Got super slow running stuff, RIP this check
+	// if inspectItem.Cmp(big.NewInt(0)) == -1 {
+	// 	fmt.Println("Bad math???")
+	// 	fmt.Println(first, second, input.operator, inspectItem)
+	// 	os.Exit(0)
+	// }
+	// Comment below for solution 2
+	// inspectItem = stressRelief(inspectItem)
 	// Time to test it
-	if inspectItem%input.test == 0 {
+	monkeyinspect := big.NewInt(0)
+	monkeyinspect.Mod(inspectItem, big.NewInt(int64(input.test)))
+	if monkeyinspect.BitLen() == 0 {
 		monkeyThrow = input.test_pass
 	} else {
 		monkeyThrow = input.test_fail
 	}
-	output.inspect_count += 1
+	output.inspect_count.Add(output.inspect_count, big.NewInt(1))
 	return output, inspectItem, monkeyThrow
 
 }
@@ -110,9 +123,9 @@ func main() {
 				if idx < 4 {
 					continue
 				}
-				var current_item, _ = strconv.Atoi(strings.Trim(x, ","))
-				current_monkey_struct.items = append(current_monkey_struct.items, current_item)
-				current_monkey_struct.inspect_count = 0
+				var current_item, _ = strconv.ParseInt(strings.Trim(x, ","), 10, 0)
+				current_monkey_struct.items = append(current_monkey_struct.items, big.NewInt(current_item))
+				current_monkey_struct.inspect_count = big.NewInt(0)
 			}
 		} else if strings.Contains(line, "Operation:") {
 			for idx, current_item := range line_array {
@@ -142,31 +155,42 @@ func main() {
 	monkey_list = append(monkey_list, current_monkey_struct)
 	// Initial monkey list is created
 	fmt.Println("Initial List:", monkey_list, len(monkey_list))
-	var rounds = 20
+	// For Solution One
+	//var rounds = 20
+	// For Solution Two
+	var rounds = 10000
 	for i := 0; i < rounds; i++ {
-		for k, _ := range monkey_list {
+		for k := range monkey_list {
 			// Begin one round of inspections
 			for range monkey_list[k].items {
-				var item_thrown = 0
+				item_thrown := big.NewInt(0)
 				var monkey_receiver = 0
 				monkey_list[k], item_thrown, monkey_receiver = oneMonkeyInspection(monkey_list[k])
 				monkey_list[monkey_receiver].items = append(monkey_list[monkey_receiver].items, item_thrown)
-				//fmt.Println(item_thrown, monkey_receiver)
+				// fmt.Println(item_thrown, monkey_receiver)
 			}
+			// fmt.Println("Monkeys:", k, monkey_list[k].inspect_count, monkey_list[k].items)
 		}
-		//fmt.Println("After round", i+1, monkey_list)
+		if i%100 == 0 {
+			fmt.Println("Hit", i)
+		}
 	}
 	// Solution one
-	var max_inspects = 0
-	var second_most_inspects = 0
+	// var max_inspects int = 0
+	// var second_most_inspects int = 0
+	// Solution Two crap
+	max_inspects := big.NewInt(0)
+	second_most_inspects := big.NewInt(0)
 	for _, v := range monkey_list {
-		if v.inspect_count > max_inspects {
+		if v.inspect_count.Cmp(max_inspects) == 1 {
 			second_most_inspects = max_inspects
 			max_inspects = v.inspect_count
-		} else if v.inspect_count > second_most_inspects {
+		} else if v.inspect_count.Cmp(second_most_inspects) == 1 {
 			second_most_inspects = v.inspect_count
 		}
 	}
-	fmt.Println("Solution One:", max_inspects*second_most_inspects)
-
+	// Solution One
+	// fmt.Println("Solution One:", max_inspects*second_most_inspects, max_inspects, second_most_inspects)
+	// Solution Two
+	fmt.Println("Solution Two:", big.NewInt(0).Mul(max_inspects, second_most_inspects), max_inspects, second_most_inspects)
 }
