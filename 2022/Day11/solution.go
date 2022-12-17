@@ -102,7 +102,16 @@ func oneMonkeyInspection(input Monkey) (output Monkey, inspectItem *big.Int, mon
 	}
 	output.inspect_count.Add(output.inspect_count, big.NewInt(1))
 	return output, inspectItem, monkeyThrow
+}
 
+func reduceItemsThrown(input *big.Int, monkeyPrime *big.Int) *big.Int {
+	if input.Cmp(monkeyPrime) == 1 {
+		for i := 0; input.Cmp(monkeyPrime) == 1; i++ {
+			input.Sub(input, monkeyPrime)
+		}
+	}
+	// If input isn't greater than monkeyPrime, do nothing!
+	return input
 }
 
 func main() {
@@ -110,12 +119,11 @@ func main() {
 	//var current_monkey_count = 0
 	var current_monkey_struct = Monkey{}
 	var monkey_list []Monkey
+	monkeyPrime := big.NewInt(1)
 	for _, line := range lines {
 		var line_array = strings.Split(line, " ")
 		if strings.HasPrefix(line, "Monkey") {
 			// Have to ignore the colon at the end to parse to int properly
-			//var monkey_number, _ = strconv.Atoi(strings.Trim(line_array[1], ":"))
-			//current_monkey_count = monkey_number
 			current_monkey_struct = Monkey{}
 		} else if strings.Contains(line, "Starting") {
 			for idx, x := range line_array {
@@ -140,6 +148,7 @@ func main() {
 		} else if strings.Contains(line, "Test: ") {
 			var test_number, _ = strconv.Atoi(line_array[5])
 			current_monkey_struct.test = test_number
+			monkeyPrime.Mul(monkeyPrime, big.NewInt(int64(test_number)))
 		} else if strings.Contains(line, "If true:") {
 			var throw_number, _ = strconv.Atoi(line_array[9])
 			current_monkey_struct.test_pass = throw_number
@@ -154,7 +163,7 @@ func main() {
 	// Last monkey to be defined doesn't have a line break or anything
 	monkey_list = append(monkey_list, current_monkey_struct)
 	// Initial monkey list is created
-	fmt.Println("Initial List:", monkey_list, len(monkey_list))
+	//fmt.Println("Initial List:", monkey_list, len(monkey_list))
 	// For Solution One
 	//var rounds = 20
 	// For Solution Two
@@ -166,10 +175,10 @@ func main() {
 				item_thrown := big.NewInt(0)
 				var monkey_receiver = 0
 				monkey_list[k], item_thrown, monkey_receiver = oneMonkeyInspection(monkey_list[k])
+				item_thrown = reduceItemsThrown(item_thrown, monkeyPrime)
 				monkey_list[monkey_receiver].items = append(monkey_list[monkey_receiver].items, item_thrown)
-				// fmt.Println(item_thrown, monkey_receiver)
+				//fmt.Println(item_thrown, monkey_receiver)
 			}
-			// fmt.Println("Monkeys:", k, monkey_list[k].inspect_count, monkey_list[k].items)
 		}
 		if i%100 == 0 {
 			fmt.Println("Hit", i)
