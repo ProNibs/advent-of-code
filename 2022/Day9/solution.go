@@ -44,10 +44,21 @@ func deduplicateSlice(input [][2]int) [][2]int {
 	return new_slice
 }
 
-func moveOnce(head [2]int, tail [2]int, direction string) ([2]int, [2]int) {
+func moveHead(head [2]int, direction string) [2]int {
 	if direction == "L" {
 		head[0] -= 1
-		//fmt.Println("Head now at", head)
+	} else if direction == "R" {
+		head[0] += 1
+	} else if direction == "U" {
+		head[1] += 1
+	} else if direction == "D" {
+		head[1] -= 1
+	}
+	return head
+}
+
+func calculateFollowing(head [2]int, tail [2]int, direction string) [2]int {
+	if direction == "L" {
 		if tail[0]-head[0] > 1 {
 			//fmt.Println("Need to move tail LEFT from", tail)
 			tail[0] = head[0] + 1
@@ -55,8 +66,6 @@ func moveOnce(head [2]int, tail [2]int, direction string) ([2]int, [2]int) {
 			//fmt.Println("Tail moved to", tail, "to match", head)
 		}
 	} else if direction == "R" {
-		head[0] += 1
-		// fmt.Println("Head now at", head)
 		if head[0]-tail[0] > 1 {
 			// fmt.Println("Need to move tail RIGHT from", tail)
 			tail[0] = head[0] - 1
@@ -64,8 +73,6 @@ func moveOnce(head [2]int, tail [2]int, direction string) ([2]int, [2]int) {
 			// fmt.Println("Tail moved to", tail, "to match", head)
 		}
 	} else if direction == "U" {
-		head[1] += 1
-		// fmt.Println("Head now at", head)
 		if head[1]-tail[1] > 1 {
 			// fmt.Println("Need to move tail UP from", tail)
 			tail[1] = head[1] - 1
@@ -73,8 +80,6 @@ func moveOnce(head [2]int, tail [2]int, direction string) ([2]int, [2]int) {
 			// fmt.Println("Tail moved to", tail, "to match", head)
 		}
 	} else if direction == "D" {
-		head[1] -= 1
-		// fmt.Println("Head now at", head)
 		if tail[1]-head[1] > 1 {
 			// fmt.Println("Need to move tail DOWN from", tail)
 			tail[1] = head[1] + 1
@@ -82,13 +87,21 @@ func moveOnce(head [2]int, tail [2]int, direction string) ([2]int, [2]int) {
 			// fmt.Println("Tail moved to", tail, "to match", head)
 		}
 	}
-	return head, tail
+	return tail
 }
 
 func main() {
 	lines, _ := readLines("data.txt")
 	// Assume 0,0 is starting point
 	head_position := [2]int{0, 0}
+	// one_position := [2]int{0, 0}
+	// two_position := [2]int{0, 0}
+	// three_position := [2]int{0, 0}
+	// four_position := [2]int{0, 0}
+	// five_position := [2]int{0, 0}
+	// six_position := [2]int{0, 0}
+	// seven_position := [2]int{0, 0}
+	// eight_position := [2]int{0, 0}
 	tail_position := [2]int{0, 0}
 	var tail_positions [][2]int
 	tail_positions = append(tail_positions, tail_position)
@@ -97,8 +110,9 @@ func main() {
 		direction := line_array[0]
 		amount, _ := strconv.Atoi(line_array[1])
 		for i := 0; i < amount; i++ {
-			//fmt.Println(i)
-			head_position, tail_position = moveOnce(head_position, tail_position, direction)
+			// For Sol One
+			head_position = moveHead(head_position, direction)
+			tail_position = calculateFollowing(head_position, tail_position, direction)
 			tail_positions = append(tail_positions, tail_position)
 		}
 	}
