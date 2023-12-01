@@ -1,0 +1,63 @@
+strict graph {
+
+	"EE" [  weight=3 ];
+
+	"EE" -- "DD" [  weight=0 ];
+
+	"EE" -- "FF" [  weight=0 ];
+
+	"FF" [  weight=0 ];
+
+	"FF" -- "EE" [  weight=0 ];
+
+	"FF" -- "GG" [  weight=0 ];
+
+	"CC" [  weight=2 ];
+
+	"CC" -- "BB" [  weight=0 ];
+
+	"CC" -- "DD" [  weight=0 ];
+
+	"DD" [  weight=20 ];
+
+	"DD" -- "CC" [  weight=0 ];
+
+	"DD" -- "EE" [  weight=0 ];
+
+	"DD" -- "AA" [  weight=0 ];
+
+	"GG" [  weight=0 ];
+
+	"GG" -- "FF" [  weight=0 ];
+
+	"GG" -- "HH" [  weight=0 ];
+
+	"JJ" [  weight=21 ];
+
+	"JJ" -- "II" [  weight=0 ];
+
+	"II" [  weight=0 ];
+
+	"II" -- "AA" [  weight=0 ];
+
+	"II" -- "JJ" [  weight=0 ];
+
+	"AA" [  weight=0 ];
+
+	"AA" -- "DD" [  weight=0 ];
+
+	"AA" -- "II" [  weight=0 ];
+
+	"AA" -- "BB" [  weight=0 ];
+
+	"HH" [  weight=22 ];
+
+	"HH" -- "GG" [  weight=0 ];
+
+	"BB" [  weight=13 ];
+
+	"BB" -- "CC" [  weight=0 ];
+
+	"BB" -- "AA" [  weight=0 ];
+
+}
