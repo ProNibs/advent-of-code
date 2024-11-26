@@ -50,7 +50,7 @@ func followTheMap(direction_input []string, route_table map[string]Direction) in
 }
 
 func main() {
-	lines, _ := readLines("data.txt")
+	lines, _ := readLines("testdata2.txt")
 	solution := 0
 	var directions []string
 	route_table := make(map[string]Direction)
