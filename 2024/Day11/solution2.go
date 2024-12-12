@@ -1,9 +1,10 @@
-package main
+package day11
 
 import (
 	"bufio"
 	"os"
-	"slices"
+	"strconv"
+	"strings"
 )
 
 // readLines reads a whole file into memory
@@ -23,103 +24,78 @@ func readLines(path string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
-func straight_up_diagonal_searches(input [][]string) [][]int {
-	var output [][]int
-	for i, one_row := range input {
-		for j, one_character := range one_row {
-			// Looking for an "M" to start this off but don't want index errors
-			if one_character == "M" && i-2 >= 0 {
-				// println("Found an M here:", i, j)
-				// Scenario: diagonal up and going left
-				if j-2 >= 0 {
-					if input[i-1][j-1] == "A" {
-						if input[i-2][j-2] == "S" {
-							output = append(output, []int{i - 1, j - 1})
-						}
-					}
-				}
-				if j+2 < len(one_row) {
-					// Scenario: diagonal up and going right
-					if input[i-1][j+1] == "A" {
-						if input[i-2][j+2] == "S" {
-							output = append(output, []int{i - 1, j + 1})
-						}
-					}
-				}
-				// println("Output ended up being", output)
-			}
+func reduce_left_side(input int) int {
+	if input%2024 == 0 {
+		input = input / 2024
+		if input%2024 == 0 {
+			// Still divisible, recursion plox
+			return reduce_left_side(input)
 		}
 	}
-	// println("Diagonal and up:", output, "Expected: 8")
-	return output
+	return input
 }
 
-func straight_down_diagonal_searches(input [][]string) [][]int {
-	var output [][]int
-	for i, one_row := range input {
-		for j, one_character := range one_row {
-			// Looking for an "M" to start this off but don't want index errors
-			if one_character == "M" && i+2 < len(one_row) {
-				// println("Found an X here:", i, j)
-				// Scenario: diagonal down and going left
-				if j-2 >= 0 {
-					if input[i+1][j-1] == "A" {
-						if input[i+2][j-2] == "S" {
-							output = append(output, []int{i + 1, j - 1})
-						}
-					}
-				}
-				if j+2 < len(one_row) {
-					// Scenario: diagonal down and going right
-					if input[i+1][j+1] == "A" {
-						if input[i+2][j+2] == "S" {
-							output = append(output, []int{i + 1, j + 1})
-						}
-					}
-				}
-				// println("Output ended up being", output)
-			}
-		}
+func address_one_stone(input int) (int, int) {
+	input_as_string := strconv.Itoa(input)
+	if input == 0 {
+		return 1, -1
+	} else if len(input_as_string)%2 == 0 {
+		left_side, _ := strconv.Atoi(input_as_string[:len(input_as_string)/2])
+		right_side, _ := strconv.Atoi(input_as_string[(len(input_as_string))/2:])
+		// Check if leftside is divisible by 2024 and do it
+		left_side = reduce_left_side(left_side)
+		return left_side, right_side
+	} else {
+		new_number := input * 2024
+		// Let's try to keep these numbers small
+		return new_number, -1
 	}
-	// println("Diagonal and down:", output, "Expected: 2")
-	return output
 }
 
 func main() {
 	lines, _ := readLines("data.txt")
-	solution := 0
-	var word_search_arrays [][]string
+	// solution := 0
+	var initial_stone_array []int
 	for _, line := range lines {
-		// println("Raw:", line)
-		new_array := make([]string, len(line))
-		for i, one_character := range line {
-			new_array[i] = string(one_character)
-		}
-		word_search_arrays = append(word_search_arrays, new_array)
-	}
-	up_diagonal := straight_up_diagonal_searches(word_search_arrays)
-	down_diagonal := straight_down_diagonal_searches(word_search_arrays)
-	diagonals_array := append(up_diagonal, down_diagonal...)
-
-	// fmt.Println(up_diagonal)
-	// fmt.Println(down_diagonal)
-	// fmt.Println(diagonals_array)
-	// At this point, has the location of "A" for each up diagonal and down diagonal
-	// Now just need to check if there is a pair in either array
-	for i, one_coordinate_pair := range diagonals_array {
-		// Check for if our pair is further to the right here
-		// Safe assumption: there can only be two matches, never 3+ sharing the same "A"
-		// Lazily for-looping again and just checking if we are i+1 essentially
-		for j, latest_coordinate_pair := range diagonals_array {
-			if j < i+1 {
-				continue
-			}
-			// fmt.Println(one_coordinate_pair, latest_coordinate_pair)
-			if slices.Equal(one_coordinate_pair, latest_coordinate_pair) {
-				solution += 1
-			}
+		println("Raw:", line)
+		for _, one_int_as_string := range strings.Split(line, " ") {
+			one_int, _ := strconv.Atoi(one_int_as_string)
+			initial_stone_array = append(initial_stone_array, one_int)
 		}
 	}
-	// fmt.Println(word_search_arrays)
-	println("Solution:", solution)
+	number_of_loops := 42
+	for i := 0; i < number_of_loops; i++ {
+		var new_stone_array []int
+		for _, one_int := range initial_stone_array {
+			// fmt.Println(one_int, address_one_stone(one_int))
+			temp1, temp2 := address_one_stone(one_int)
+			new_stone_array = append(new_stone_array, temp1)
+			if temp2 != -1 {
+				new_stone_array = append(new_stone_array, temp2)
+			}
+		}
+		// fmt.Println("New stone:", new_stone_array)
+		// deep_copy := make([]int, len(new_stone_array))
+		// Once a new stone array has been finalized, make the initial one equal it now
+		// copy(deep_copy, new_stone_array)
+		initial_stone_array = new_stone_array[:]
+		println("On iteration:", i, "Array is", len(initial_stone_array), "long right now.")
+	}
+	// fmt.Println(initial_stone_array)
+	println("Length for first array:", len(initial_stone_array))
+	println("For data on 25 loops, solution should equal 186175")
 }
+
+// Workshopping how to reduce these big numbers
+// 93339*2024 = 188918136 (len=9)
+// Divide that by 2 = 94459068 (len=8, so not a good thing)
+// Divide by 24 = 7871589 (len=7, sounds good)
+// Divide by 20 made a decimal, so that's a no-go
+
+// 10000*2024 = 20240000 (len is even)
+// 20000*2024 = 40480000 (len is even)
+// 30000*2024 = 60720000 (len is even)
+// 40000*2024 = 80960000 (len is even)
+// 50000*2024 = 101200000 (len is odd)
+// ...
+// 90000*2024 = 182160000 (len is odd)
