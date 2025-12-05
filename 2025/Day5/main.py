@@ -12,15 +12,17 @@ def fresh_ingredients(input: list[str]):
         if one_list == '':
             break
         one_list_ranges = one_list.split('-')
-        for i in range(int(one_list_ranges[0]), int(one_list_ranges[1])+1):
-            print(len(ingredient_list))
-            ingredient_list.append(i)
-        # Utilize set to get unique and so it doesn't get too big too quick
-        ingredient_list = list(set(ingredient_list))
+        ingredient_list.append((int(one_list_ranges[0]),int(one_list_ranges[1])))
     return ingredient_list
 
-def isFresh(fresh_list: list[int], input: int):
-    return input in fresh_list
+def isFresh(fresh_list: list[(int,int)], input: int):
+    fresh = False
+    for item in fresh_list:
+        if item[0] <= input <= item[1]:
+            fresh = True
+            break
+    return fresh
+    
 
 def solution_one(input: list[str]):
     fresh_items = fresh_ingredients(input)
@@ -35,7 +37,6 @@ def solution_one(input: list[str]):
 if __name__ == '__main__':
     test_file = readFile('testdata.txt')
     real_file = readFile('data.txt')
-    print(test_file)
     print(solution_one(test_file))
     print(solution_one(real_file))
 
